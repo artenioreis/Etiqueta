@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Etiqueta - {{ produto.descricao }}</title>
+    
+    <style>
+        /* ============================================ */
+        /* ESTILOS COMUNS E CONFIGURAÇÃO DE IMPRESSÃO    */
+        /* ============================================ */
+        body {
+            font-family: 'Arial', sans-serif; background-color: #f4f4f4;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 30px; margin: 0;
+        }
+        .btn-area { margin-top: 30px; display: flex; gap: 15px; }
+        .btn {
+            padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer;
+            font-weight: bold; text-decoration: none; font-size: 1em; color: white;
+        }
+        .btn-print { background-color: #007bff; }
+        .btn-back { background-color: #6c757d; }
+
+        @media print {
+            body { background: none; padding: 0; margin: 0; display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .btn-area { display: none !important; }
+            .etiqueta-container { box-shadow: none; margin: 0; page-break-inside: avoid; border: 2px solid #000 !important; }
+        }
+    </style>
+
+    {% if modelo == 'atacado' %}
+    <style>
+        .etiqueta-container {
+            background-color: #ffeb3b !important;
+            width: 78mm; height: 45mm;
+            border: 2px solid #000;
+            box-sizing: border-box; color: #000; display: flex; flex-direction: column;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Cabeçalho Preto */
+        .header-bar {
+            background-color: #000 !important; color: #ffeb3b !important; display: flex;
+            font-size: 0.85em; font-weight: bold; text-transform: uppercase;
+            padding: 5px 0; text-align: center;
+        }
+        .header-col-left { width: 55%; border-right: 2px solid #ffeb3b; }
+        .header-col-right { width: 45%; }
+        
+        /* Conteúdo Interno */
+        .body-content { 
+            display: flex; 
+            flex-direction: column; 
+            flex: 1; 
+            padding: 5px 12px 2px 12px; 
+            justify-content: space-between; 
+        }
+        
+        .prod-desc { 
+            font-size: 0.85em; 
+            font-weight: bold; 
+            line-height: 1.1; 
+            text-transform: uppercase;
+            margin-bottom: 0px;
+        }
+        
+        /* LINHA DOS PREÇOS: Alinhamento horizontal perfeito */
+        .prices-row { 
+            display: flex; 
+            align-items: center; 
+            width: 100%;
+            /* AJUSTE: Removida a margem negativa e adicionada margem positiva para DESCER os valores */
+            margin-top: 5px; 
+        }
+        .price-col-varejo { width: 55%; text-align: left; }
+        .price-col-atacado { width: 45%; text-align: center; }
+
+        /* Estilo do R$ menor */
+        .currency { font-size: 0.6em; font-weight: 900; margin-right: 2px; vertical-align: middle; }
+        
+        /* Estilo dos Números Grandes */
+        .price-value { font-size: 1.7em; font-weight: 900; line-height: 1; vertical-align: middle; }
+
+        /* Rodapé: Alinhado na base (A marca) */
+        .footer-row { 
+            display: flex; 
+            align-items: flex-end; 
+            justify-content: space-between; 
+            padding-bottom: 2px;
+            font-size: 0.82em;
+            font-weight: bold;
+        }
+        .unit-info { display: flex; gap: 8px; width: 55%; }
+        .atacado-condicao { width: 45%; text-align: center; }
+
+        @media print {
+            .etiqueta-container { background-color: #ffeb3b !important; }
+            .header-bar { background-color: #000 !important; }
+            .prod-desc, .price-value, .currency, .unit-info, .atacado-condicao { color: #000000 !important; }
+        }
+    </style>
+    {% endif %}
+
+    {% if modelo == 'gondola' %}
+    <style>
+        .etiqueta-container {
+            background: white; width: 78mm; height: 38mm;
+            padding: 2mm 8mm 2mm 12mm; position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #dcdcdc;
+            box-sizing: border-box; overflow: hidden; color: #000;
+        }
+        .descricao { font-weight: bold; font-size: 0.9em; margin-bottom: 5px; line-height: 1.1; }
+        .preco-por { font-size: 1.6em; font-weight: 900; line-height: 1; }
+        .barcode-img { height: 45px; width: auto; object-fit: contain; }
+        .barcode-ean-text { font-weight: bold; font-size: 0.8em; letter-spacing: 1px; }
+        .info-vertical-esq { position: absolute; top: 50%; left: -6mm; transform: translateY(-50%) rotate(-90deg); font-size: 0.7em; font-weight: bold; }
+        .info-vertical-dir { position: absolute; top: 50%; right: -6mm; transform: translateY(-50%) rotate(-90deg); font-size: 0.7em; font-weight: bold; }
+    </style>
+    {% endif %}
+</head>
+<body>
+
+    {% if modelo == 'atacado' %}
+    <div class="etiqueta-container">
+        <div class="header-bar">
+            <div class="header-col-left">PREÇO POR</div>
+            <div class="header-col-right">A PARTIR DE</div>
+        </div>
+        
+        <div class="body-content">
+            <div class="prod-desc">{{ produto.descricao }}</div>
+            
+            <div class="prices-row">
+                <div class="price-col-varejo">
+                    <span class="currency">R$</span><span class="price-value">{{ "%.2f"|format(produto.preco_por) }}</span>
+                </div>
+                <div class="price-col-atacado">
+                    <span class="currency">R$</span><span class="price-value">{{ "%.2f"|format(produto.preco_atacado) }}</span>
+                </div>
+            </div>
+
+            <div class="footer-row">
+                <div class="unit-info">
+                    <span>{{ produto.unidade }}</span>
+                    <span>{{ produto.ean }}</span>
+                </div>
+                <div class="atacado-condicao">
+                    A partir de: {{ produto.qtd_atacado }} {{ produto.unidade }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="etiqueta-container">
+        <div class="info-vertical-esq">{{ produto.id }}</div>
+        <div class="descricao">{{ produto.descricao }}</div>
+        <div style="margin-top: 5px;">
+            <div class="preco-por">R$ {{ "%.2f"|format(produto.preco_por) }}</div>
+        </div>
+        <div style="margin-top: 5px;">
+            {% if barcode_img %}
+                <img src="data:image/png;base64,{{ barcode_img }}" class="barcode-img">
+                <div class="barcode-ean-text">{{ produto.ean }}</div>
+            {% endif %}
+        </div>
+        <div class="info-vertical-dir">{{ data_atual }}</div>
+    </div>
+    {% endif %}
+
+    <div class="btn-area">
+        <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir Etiqueta</button>
+        <a href="/busca" class="btn btn-back">⬅️ Voltar para Busca</a>
+    </div>
+
+</body>
+</html>
