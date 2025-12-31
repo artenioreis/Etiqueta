@@ -1,0 +1,5 @@
+pyodbc==4.0.39
+reportlab==4.0.4
+python-barcode==0.14.0
+Pillow==10.0.0
+pywin32==306
