@@ -36,6 +36,7 @@
             border: 2px solid #000;
             box-sizing: border-box; color: #000; display: flex; flex-direction: column;
             font-family: 'Arial', sans-serif;
+            position: relative;
         }
 
         /* Cabeçalho Preto */
@@ -93,6 +94,29 @@
         .unit-info { display: flex; gap: 8px; width: 55%; }
         .atacado-condicao { width: 45%; text-align: center; }
 
+        /* EAN vertical na borda esquerda da etiqueta */
+        .ean-vertical {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            font-size: 0.52em;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #000;
+            white-space: nowrap;
+            background-color: #ffeb3b;
+            border-right: 1px solid #aaa;
+            overflow: hidden;
+        }
+
         @media print {
             .etiqueta-container { background-color: #ffeb3b !important; }
             .header-bar { background-color: #000 !important; }
@@ -104,17 +128,70 @@
     {% if modelo == 'gondola' %}
     <style>
         .etiqueta-container {
-            background: white; width: 78mm; height: 38mm;
-            padding: 2mm 8mm 2mm 12mm; position: relative;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #dcdcdc;
-            box-sizing: border-box; overflow: hidden; color: #000;
+            background: white;
+            width: 90mm;
+            min-height: 42mm;
+            padding: 5px 22px 5px 8px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            border: 2px solid #555;
+            box-sizing: border-box;
+            color: #000;
+            font-family: 'Arial', sans-serif;
         }
-        .descricao { font-weight: bold; font-size: 0.9em; margin-bottom: 5px; line-height: 1.1; }
-        .preco-por { font-size: 1.6em; font-weight: 900; line-height: 1; }
-        .barcode-img { height: 45px; width: auto; object-fit: contain; }
-        .barcode-ean-text { font-weight: bold; font-size: 0.8em; letter-spacing: 1px; }
-        .info-vertical-esq { position: absolute; top: 50%; left: -6mm; transform: translateY(-50%) rotate(-90deg); font-size: 0.7em; font-weight: bold; }
-        .info-vertical-dir { position: absolute; top: 50%; right: -6mm; transform: translateY(-50%) rotate(-90deg); font-size: 0.7em; font-weight: bold; }
+        /* Descrição: negrito, até 2 linhas */
+        .descricao {
+            font-weight: bold;
+            font-size: 0.92em;
+            line-height: 1.25;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+            word-break: break-word;
+        }
+        /* Preço grande */
+        .preco-por {
+            font-size: 2em;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        /* Barcode centralizado */
+        .barcode-wrap {
+            text-align: center;
+        }
+        .barcode-img {
+            height: 40px;
+            max-width: 72mm;
+            width: 100%;
+            object-fit: fill;
+            display: block;
+            margin: 0 auto;
+        }
+        /* EAN centralizado abaixo do barcode */
+        .barcode-ean-text {
+            font-size: 0.78em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 2px;
+            text-align: center;
+        }
+        /* Data/hora vertical na borda direita */
+        .info-vertical-dir {
+            position: absolute;
+            top: 50%;
+            right: -12px;
+            transform: translateY(-50%) rotate(90deg);
+            font-size: 0.62em;
+            font-weight: bold;
+            white-space: nowrap;
+            color: #333;
+        }
+        @media print {
+            .etiqueta-container {
+                border: 2px solid #000 !important;
+                box-shadow: none;
+            }
+        }
     </style>
     {% endif %}
 </head>
@@ -141,8 +218,7 @@
 
             <div class="footer-row">
                 <div class="unit-info">
-                    <span>{{ produto.unidade }}</span>
-                    <span>{{ produto.ean }}</span>
+                    <span>UN 1</span>
                 </div>
                 <div class="atacado-condicao">
                     A partir de: {{ produto.qtd_atacado }} {{ produto.unidade }}
@@ -153,17 +229,14 @@
 
     {% else %}
     <div class="etiqueta-container">
-        <div class="info-vertical-esq">{{ produto.id }}</div>
         <div class="descricao">{{ produto.descricao }}</div>
-        <div style="margin-top: 5px;">
-            <div class="preco-por">R$ {{ "%.2f"|format(produto.preco_por) }}</div>
+        <div class="preco-por">R$ {{ "%.2f"|format(produto.preco_por) }}</div>
+        {% if barcode_img %}
+        <div class="barcode-wrap">
+            <img src="data:image/png;base64,{{ barcode_img }}" class="barcode-img">
+            <div class="barcode-ean-text">{{ produto.ean }}</div>
         </div>
-        <div style="margin-top: 5px;">
-            {% if barcode_img %}
-                <img src="data:image/png;base64,{{ barcode_img }}" class="barcode-img">
-                <div class="barcode-ean-text">{{ produto.ean }}</div>
-            {% endif %}
-        </div>
+        {% endif %}
         <div class="info-vertical-dir">{{ data_atual }}</div>
     </div>
     {% endif %}

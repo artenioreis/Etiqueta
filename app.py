@@ -140,10 +140,8 @@ WHERE pc.Id_PolCom = 432 AND IsNull(pr.Cod_Classif, '') <> '' AND px.Cod_Estabe 
                 "qtd_atacado": int(row.Qtd_Min2) if row.Qtd_Min2 else 1 # Quantidade mínima para atacado
             }
 
-            # Gera o código de barras apenas se for o modelo de gôndola
-            barcode_img = None
-            if modelo_selecionado == 'gondola':
-                 barcode_img = gerar_barcode_base64(produto["ean"])
+            # Gera o código de barras para ambos os modelos
+            barcode_img = gerar_barcode_base64(produto["ean"])
             
             data_atual = datetime.now().strftime("%d/%m/%y %H:%M:%S")
 
